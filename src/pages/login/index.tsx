@@ -34,10 +34,18 @@ export default function Login(props: any) {
         redirect: 'follow'
       };
 
-      fetch("https://uiuqq28cu9.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/autenticacao/conta/solicitar", requestOptions)
-          .then(response => response.text())
-          .then(result => console.log(result))
-          .catch(error => console.log('error', error));
+      const response = await fetch("https://uiuqq28cu9.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/autenticacao/conta/solicitar", requestOptions);
+      const status = response.status;
+
+
+      if (status === 201) {
+        Alert.alert("Senha Enviada", "Senha enviada para o email informado");
+        setSenhaVisivel(true);
+      }
+      else if (status == 200) {
+        Alert.alert("Inscrição necessária", "Aceite a inscrição em seu email, depois tente novamente");
+      }
+
     } catch (error) {
       console.error('Erro ao fazer a requisição:', error);
     }
