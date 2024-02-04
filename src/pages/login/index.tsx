@@ -9,21 +9,60 @@ import {
 } from 'react-native';
 import {vh, vw} from '../../services/Tamanhos.ts';
 import {contagemRegressiva} from "../../services/Time.ts";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-function login(navigation: any) {
+function navigateToCarrinho(navigation: any) {
   navigation.replace('Carrinho');
 }
 
 export default function Login(props: any) {
+
+  React.useEffect(() => {
+    AsyncStorage.getItem("token")
+        .then(t => {
+          if(t !== null) {
+            navigateToCarrinho(props.navigation);
+          }
+        });
+  }, []);
+
   const [senhaVisivel, setSenhaVisivel] = React.useState(false);
 
   const [email, setEmail] = React.useState("");
 
+  const [senha, setSenha] = React.useState("");
+
   const [segundosFaltando, setSegundosFaltando] = React.useState(0);
 
+  // verificaLogin(props.navigation);
+
   const solicitarNovamente = () => {
-    setSegundosFaltando(15);
+    solicitarSenha(email);
     contagemRegressiva(15, setSegundosFaltando);
+  }
+
+  const login = async (email: string, senha: string)=> {
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    const raw = JSON.stringify({
+      "email": email,
+      "senha": senha,
+    });
+
+    const requestOptions: RequestInit = {
+      method: 'POST',
+      headers: myHeaders,
+      body: raw,
+      redirect: 'follow'
+    };
+
+    fetch("https://uiuqq28cu9.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/autenticacao/conta/login", requestOptions)
+        .then(response => response.text())
+        .then(result => JSON.parse(result))
+        .then(obj => AsyncStorage.setItem("token", obj.token))
+        .then(() => navigateToCarrinho(props.navigation))
+        .catch(error => console.log('error', error));
   }
 
   const solicitarSenha = async (email: string) => {
@@ -73,6 +112,8 @@ export default function Login(props: any) {
         placeholder="Senha"
         autoCapitalize="none"
         secureTextEntry={true}
+        value={senha}
+        onChangeText={setSenha}
     />}
     {senhaVisivel && <Text>
       Não recebeu?
@@ -90,6 +131,8 @@ export default function Login(props: any) {
         if (!senhaVisivel) {
           solicitarSenha(email);
           setSenhaVisivel(true);
+        } else {
+          login(email, senha);
         }
         // Alert.alert("Login", "Corpo");
       }}>
@@ -143,3 +186,4 @@ const styles = StyleSheet.create({
     color: '#1b50de',
   },
 });
+

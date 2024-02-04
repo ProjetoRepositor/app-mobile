@@ -5,9 +5,9 @@ export const sleep = async (ms: number) => {
 }
 
 export const contagemRegressiva = (contador: number, callback: (tempoRestante: number) => void) => {
+    callback(contador);
     setTimeout(() => {
         if (contador > 0) {
-            callback(contador - 1);
             contagemRegressiva(contador - 1, callback);
         }
     }, 1000);
