@@ -1,9 +1,9 @@
 import React from 'react';
 import ItemCarrinho from "../../components/itemCarrinho";
-import {Button, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
+import {Button, ScrollView, StyleSheet, TextInput, View} from "react-native";
 import {vh, vw} from "../../services/Tamanhos.ts";
 
-export default function Busca(props: any) {
+export default function Busca() {
     return (
         <ScrollView>
             <View style={styles.searchContainer}>
@@ -14,15 +14,31 @@ export default function Busca(props: any) {
                 />
                 <Button title="Buscar" />
             </View>
-            <ItemCarrinho />
-            <ItemCarrinho />
-            <ItemCarrinho />
-            <ItemCarrinho />
-            <ItemCarrinho />
-            <ItemCarrinho />
-            <ItemCarrinho />
-            <ItemCarrinho />
-            <ItemCarrinho />
+            <ItemCarrinho
+                imageUrl="https://superpao.vtexassets.com/unsafe/fit-in/720x720/center/middle/https%3A%2F%2Fsuperpao.vtexassets.com%2Farquivos%2Fids%2F366406%2FCreme-De-Leite-Leve-Uht-Homogeneizado-Piracanjuba-Caixa-200G.jpg%3Fv%3D638376717684430000"
+                title="Creme de Leite Piracanjuba 200g"
+                qtd={5}
+            />
+            <ItemCarrinho
+                imageUrl="https://superpao.vtexassets.com/unsafe/fit-in/720x720/center/middle/https%3A%2F%2Fsuperpao.vtexassets.com%2Farquivos%2Fids%2F366406%2FCreme-De-Leite-Leve-Uht-Homogeneizado-Piracanjuba-Caixa-200G.jpg%3Fv%3D638376717684430000"
+                title="Creme de Leite Piracanjuba 200g"
+                qtd={5}
+            />
+            <ItemCarrinho
+                imageUrl="https://superpao.vtexassets.com/unsafe/fit-in/720x720/center/middle/https%3A%2F%2Fsuperpao.vtexassets.com%2Farquivos%2Fids%2F366406%2FCreme-De-Leite-Leve-Uht-Homogeneizado-Piracanjuba-Caixa-200G.jpg%3Fv%3D638376717684430000"
+                title="Creme de Leite Piracanjuba 200g"
+                qtd={5}
+            />
+            <ItemCarrinho
+                imageUrl="https://superpao.vtexassets.com/unsafe/fit-in/720x720/center/middle/https%3A%2F%2Fsuperpao.vtexassets.com%2Farquivos%2Fids%2F366406%2FCreme-De-Leite-Leve-Uht-Homogeneizado-Piracanjuba-Caixa-200G.jpg%3Fv%3D638376717684430000"
+                title="Creme de Leite Piracanjuba 200g"
+                qtd={5}
+            />
+            <ItemCarrinho
+                imageUrl="https://superpao.vtexassets.com/unsafe/fit-in/720x720/center/middle/https%3A%2F%2Fsuperpao.vtexassets.com%2Farquivos%2Fids%2F366406%2FCreme-De-Leite-Leve-Uht-Homogeneizado-Piracanjuba-Caixa-200G.jpg%3Fv%3D638376717684430000"
+                title="Creme de Leite Piracanjuba 200g"
+                qtd={5}
+            />
         </ScrollView>
     );
 }

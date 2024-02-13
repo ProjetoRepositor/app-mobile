@@ -19,8 +19,8 @@ export default function Login(props: any) {
 
   React.useEffect(() => {
     AsyncStorage.getItem("token")
-        .then(t => {
-          if(t !== null) {
+        .then(token => {
+          if(token !== null) {
             navigateToCarrinho(props.navigation);
           }
         });
