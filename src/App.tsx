@@ -14,12 +14,9 @@ import CarrinhoComponent from "./pages/carrinho";
 import {Button, Image, TouchableOpacity} from "react-native";
 import DispositivosComponent from "./pages/dispositivos";
 import BuscaComponent from "./pages/busca";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Stack = createNativeStackNavigator();
-
-function irParaDispositivos(navigation: any) {
-    navigation.replace('Dispositivos');
-}
 
 function App(): React.JSX.Element {
   return (
@@ -37,7 +34,7 @@ function App(): React.JSX.Element {
             title: 'Carrinho',
             headerRight: () => (
                 <>
-                    <Button title="Dispositivos" onPress={() => props.navigation.replace("Dispositivos")}/>
+                    <Button title="Sair" onPress={() => AsyncStorage.removeItem("token").then(() => props.navigation.replace("Home"))}/>
                     <TouchableOpacity onPress={() => props.navigation.replace("Busca")}>
                         <Image
                             source={require('./assets/busca.png')}
