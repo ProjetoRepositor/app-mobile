@@ -2,35 +2,62 @@ import React from 'react';
 import ItemCarrinho from "../../components/itemCarrinho";
 import {ScrollView, StyleSheet, Text, TouchableOpacity} from "react-native";
 import {vh, vw} from "../../services/Tamanhos.ts";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+type CarrinhoApi = {
+    codigoDeBarras: string,
+    quantidade: number,
+};
+
+type Carrinho = {
+    ean: string,
+    nome: string,
+    cosmosImageUrl: string,
+    quantidade: number,
+}
 
 export default function Carrinho() {
+    const [carrinho, setCarrinho] = React.useState<Carrinho[]>([]);
+
+    React.useEffect(() => {
+        AsyncStorage.getItem("token").then(async token => {
+            if(!token) return;
+            const response: Carrinho[] = [];
+            const myHeaders = new Headers();
+
+            myHeaders.append("token", token);
+            const requestOptions: RequestInit = {
+                method: 'GET',
+                headers: myHeaders,
+                redirect: 'follow'
+            };
+
+            const result = await fetch("https://rq0ak44zy0.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/carrinho", requestOptions);
+            const resultJson: CarrinhoApi[] = await result.json();
+            for (let i = 0; i < resultJson.length; i++) {
+                const r = resultJson[i];
+                const requestOptions: RequestInit = {
+                    method: "GET",
+                    redirect: "follow"
+                };
+                const produto = await fetch(`https://vp4pbajd60.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/produto/${r.codigoDeBarras}`, requestOptions);
+                const produtoJson: Carrinho = await produto.json();
+                response.push({...produtoJson, quantidade: r.quantidade});
+            }
+            setCarrinho(response);
+        });
+    }, [])
+
     return (
       <ScrollView>
-          <ItemCarrinho
-              imageUrl="https://superpao.vtexassets.com/unsafe/fit-in/720x720/center/middle/https%3A%2F%2Fsuperpao.vtexassets.com%2Farquivos%2Fids%2F366406%2FCreme-De-Leite-Leve-Uht-Homogeneizado-Piracanjuba-Caixa-200G.jpg%3Fv%3D638376717684430000"
-              title="Creme de Leite Piracanjuba 200g"
-              qtd={5}
-          />
-          <ItemCarrinho
-              imageUrl="https://superpao.vtexassets.com/unsafe/fit-in/720x720/center/middle/https%3A%2F%2Fsuperpao.vtexassets.com%2Farquivos%2Fids%2F366406%2FCreme-De-Leite-Leve-Uht-Homogeneizado-Piracanjuba-Caixa-200G.jpg%3Fv%3D638376717684430000"
-              title="Creme de Leite Piracanjuba 200g"
-              qtd={5}
-          />
-          <ItemCarrinho
-              imageUrl="https://superpao.vtexassets.com/unsafe/fit-in/720x720/center/middle/https%3A%2F%2Fsuperpao.vtexassets.com%2Farquivos%2Fids%2F366406%2FCreme-De-Leite-Leve-Uht-Homogeneizado-Piracanjuba-Caixa-200G.jpg%3Fv%3D638376717684430000"
-              title="Creme de Leite Piracanjuba 200g"
-              qtd={5}
-          />
-          <ItemCarrinho
-              imageUrl="https://superpao.vtexassets.com/unsafe/fit-in/720x720/center/middle/https%3A%2F%2Fsuperpao.vtexassets.com%2Farquivos%2Fids%2F366406%2FCreme-De-Leite-Leve-Uht-Homogeneizado-Piracanjuba-Caixa-200G.jpg%3Fv%3D638376717684430000"
-              title="Creme de Leite Piracanjuba 200g"
-              qtd={5}
-          />
-          <ItemCarrinho
-              imageUrl="https://superpao.vtexassets.com/unsafe/fit-in/720x720/center/middle/https%3A%2F%2Fsuperpao.vtexassets.com%2Farquivos%2Fids%2F366406%2FCreme-De-Leite-Leve-Uht-Homogeneizado-Piracanjuba-Caixa-200G.jpg%3Fv%3D638376717684430000"
-              title="Creme de Leite Piracanjuba 200g"
-              qtd={5}
-          />
+          {carrinho.map(c => {
+              return <ItemCarrinho
+                  key={c.ean}
+                  imageUrl={`https://cdn-cosmos.bluesoft.com.br/products/${c.ean}`}
+                  title={c.nome}
+                  qtd={c.quantidade}
+              />
+          })}
           <TouchableOpacity style={styles.finalizarCompra}>
               <Text>
                   Finalizar Compra
