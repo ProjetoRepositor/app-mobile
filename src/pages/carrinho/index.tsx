@@ -1,8 +1,9 @@
 import React from 'react';
 import ItemCarrinho from "../../components/itemCarrinho";
-import {ScrollView, StyleSheet, Text, TouchableOpacity} from "react-native";
-import {vh, vw} from "../../services/Tamanhos.ts";
+import { ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { vh, vw } from "../../services/Tamanhos.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Loading from '../../components/loading/index.tsx';
 
 type CarrinhoApi = {
     codigoDeBarras: string,
@@ -18,10 +19,11 @@ type Carrinho = {
 
 export default function Carrinho() {
     const [carrinho, setCarrinho] = React.useState<Carrinho[]>([]);
+    const [carregado, setCarregado] = React.useState<boolean>(false);
 
     React.useEffect(() => {
         AsyncStorage.getItem("token").then(async token => {
-            if(!token) return;
+            if (!token) return;
             const response: Carrinho[] = [];
             const myHeaders = new Headers();
 
@@ -42,28 +44,30 @@ export default function Carrinho() {
                 };
                 const produto = await fetch(`https://vp4pbajd60.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/produto/${r.codigoDeBarras}`, requestOptions);
                 const produtoJson: Carrinho = await produto.json();
-                response.push({...produtoJson, quantidade: r.quantidade});
+                response.push({ ...produtoJson, quantidade: r.quantidade });
             }
             setCarrinho(response);
+            setCarregado(true);
         });
     }, [])
 
     return (
-      <ScrollView>
-          {carrinho.map(c => {
-              return <ItemCarrinho
-                  key={c.ean}
-                  imageUrl={`https://cdn-cosmos.bluesoft.com.br/products/${c.ean}`}
-                  title={c.nome}
-                  qtd={c.quantidade}
-              />
-          })}
-          <TouchableOpacity style={styles.finalizarCompra}>
-              <Text>
-                  Finalizar Compra
-              </Text>
-          </TouchableOpacity>
-      </ScrollView>
+        <ScrollView>
+            {!carregado && <Loading />}
+            {carregado && carrinho.map(c => {
+                return <ItemCarrinho
+                    key={c.ean}
+                    imageUrl={`https://cdn-cosmos.bluesoft.com.br/products/${c.ean}`}
+                    title={c.nome}
+                    qtd={c.quantidade}
+                />
+            })}
+            {carregado && <TouchableOpacity style={styles.finalizarCompra}>
+                <Text>
+                    Finalizar Compra
+                </Text>
+            </TouchableOpacity>}
+        </ScrollView>
     );
 }
 

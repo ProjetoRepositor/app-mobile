@@ -23,7 +23,13 @@ export default function ItemCarrinho(props: Props) {
             </View>
             <View style={styles.detalhes}>
                 <Text style={styles.font}>
-                    {props.title}
+                    {props.title.substring(0, 26)}
+                </Text>
+                <Text style={styles.font}>
+                    {props.title.substring(26, 52)}
+                </Text>
+                <Text style={styles.font}>
+                    {props.title.substring(52, 78)}
                 </Text>
                 <View style={styles.quantidadeContainer}>
                     <View style={styles.quantidade}>
@@ -53,6 +59,7 @@ const styles = StyleSheet.create({
     quantidadeContainer: {
         alignItems: 'center',
         marginTop: 2 * vh,
+        width: 60 * vw,
     },
     quantidade: {
         flexDirection: 'row'
