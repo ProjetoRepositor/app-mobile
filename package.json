@@ -1,5 +1,5 @@
 {
-  "name": "CarrinhoInteligente",
+  "name": "carrinho_inteligente",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -16,6 +16,7 @@
     "expo": "^50.0.0",
     "react": "18.2.0",
     "react-native": "0.73.2",
+    "react-native-ble-manager": "^11.3.2",
     "react-native-bouncy-checkbox": "^3.0.7",
     "react-native-safe-area-context": "^4.8.2",
     "react-native-screens": "^3.29.0",

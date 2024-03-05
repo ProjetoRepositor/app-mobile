@@ -1,6 +1,5 @@
 import React from 'react';
-import ItemCarrinho from "../../components/itemCarrinho";
-import {ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {ScrollView, StyleSheet, Text, TouchableOpacity} from "react-native";
 import {vh, vw} from "../../services/Tamanhos.ts";
 import LinhaDispositivo from "../../components/linhaDispositivo";
 
@@ -11,7 +10,7 @@ export default function Dispositivos(props: any) {
             <LinhaDispositivo nome="Dispositivo do Zeca" />
             <LinhaDispositivo nome="Dispositivo do Zeca" />
             <LinhaDispositivo nome="Dispositivo do Zeca" />
-            <TouchableOpacity style={styles.finalizarCompra}>
+            <TouchableOpacity style={styles.finalizarCompra} onPress={() => props.navigation.navigate('AdicionarDispositivo')}>
                 <Text>
                     Adicionar Dispositivo
                 </Text>

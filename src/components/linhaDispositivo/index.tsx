@@ -1,7 +1,6 @@
 import React from 'react';
 import {Image, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {vh, vw} from "../../services/Tamanhos.ts";
-import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 export default function LinhaDispositivo(props: any) {
     return (
@@ -13,6 +12,13 @@ export default function LinhaDispositivo(props: any) {
             </View>
             <View style={styles.detalhes}>
                 <View style={styles.quantidade}>
+                    <TouchableOpacity style={styles.botaoRemover}>
+                        <Image
+                            source={require('../../assets/lixo.png')}
+                            style={{width: 4 * vw, height: 3 * vh, marginTop: 0.5 * vh}}
+                            tintColor='white'
+                        />
+                    </TouchableOpacity>
                     <TouchableOpacity style={styles.botaoRemover}>
                         <Image
                             source={require('../../assets/lixo.png')}

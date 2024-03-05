@@ -42,9 +42,19 @@ export default function Carrinho() {
                     method: "GET",
                     redirect: "follow"
                 };
-                const produto = await fetch(`https://vp4pbajd60.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/produto/${r.codigoDeBarras}`, requestOptions);
-                const produtoJson: Carrinho = await produto.json();
-                response.push({ ...produtoJson, quantidade: r.quantidade });
+                try {
+                    const produto = await fetch(`https://vp4pbajd60.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/produto/${r.codigoDeBarras}`, requestOptions);
+                    const produtoJson: Carrinho = await produto.json();
+                    response.push({ ...produtoJson, quantidade: r.quantidade });
+                }
+                catch {
+                    response.push({
+                        ean: r.codigoDeBarras,
+                        quantidade: r.quantidade,
+                        nome: r.codigoDeBarras,
+                        cosmosImageUrl: '',
+                    });
+                }
             }
             setCarrinho(response);
             setCarregado(true);
