@@ -2,7 +2,7 @@ import React from 'react';
 import {View, Text, StyleSheet, TextInput, PermissionsAndroid, Button, Alert} from 'react-native';
 import WifiManager from 'react-native-wifi-reborn'
 import BluetoothClassic from 'react-native-bluetooth-classic';
-import RNPickerSelect from 'react-native-picker-select';
+import RNPickerSelect, {PickerStyle} from 'react-native-picker-select';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const styles = StyleSheet.create({
@@ -46,16 +46,20 @@ async function getHc05Device() {
 
 async function listarWifi() {
     const wifiList = await WifiManager.loadWifiList();
-    return wifiList.map(w => w.SSID);
+    const list = wifiList.map(w => w.SSID);
+    const set = new Set(list);
+    return [...set];
 }
 
-async function sendData(ssid: string, password: string, token: string) {
+async function sendData(ssid: string, password: string, token: string, navigarion: any) {
     const hc05 = await getHc05Device();
     hc05?.write(JSON.stringify({
         ssid,
         password,
         token,
     }));
+    Alert.alert('Wifi do dispositivo configurado');
+    navigarion.goBack()
 }
 
 const AdicionarDispositivo = (props: any) => {
@@ -78,11 +82,14 @@ const AdicionarDispositivo = (props: any) => {
     return (
         <View style={styles.container}>
             {connected && <View style={styles.container}>
+                <Text>SSID</Text>
                 <RNPickerSelect
                     items={wifis.map(w => ({label: w, value: w}))}
                     value={ssid}
                     onValueChange={setSsid}
+                    style={styles.item as PickerStyle}
                 />
+                <Text>Senha</Text>
                 <TextInput
                     style={styles.item}
                     placeholder='Senha'
@@ -94,7 +101,7 @@ const AdicionarDispositivo = (props: any) => {
                 <Button
                     title="Conectar" onPress={() => {
                     AsyncStorage.getItem('token')
-                        .then((token) => sendData(ssid, password, token!))
+                        .then((token) => sendData(ssid, password, token!, props.navigation))
                 }} />
             </View>}
             {!connected && <Text>Não conectado</Text>}

@@ -56,7 +56,7 @@ export default function Carrinho() {
                     });
                 }
             }
-            setCarrinho(response);
+            setCarrinho(response.filter(p => p.nome));
             setCarregado(true);
         });
     }, [])

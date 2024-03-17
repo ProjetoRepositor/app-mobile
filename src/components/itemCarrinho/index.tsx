@@ -65,8 +65,6 @@ function removerQuantidade(ean: string, quantidade: number, setQuantidade: (x: n
 export default function ItemCarrinho(props: Props) {
     const [quantidade, setQuantidade] = React.useState(props.qtd);
 
-    // console.log(props.ean)
-
     return (
         <>
             {(props.isSearch || (quantidade > 0)) && <View style={styles.container}>
