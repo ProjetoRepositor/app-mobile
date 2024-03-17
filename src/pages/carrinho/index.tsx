@@ -56,7 +56,7 @@ export default function Carrinho() {
                     });
                 }
             }
-            setCarrinho(response);
+            setCarrinho(response.filter(p => p.nome));
             setCarregado(true);
         });
     }, [])
@@ -70,6 +70,7 @@ export default function Carrinho() {
                     imageUrl={`https://cdn-cosmos.bluesoft.com.br/products/${c.ean}`}
                     title={c.nome}
                     qtd={c.quantidade}
+                    ean={c.ean}
                 />
             })}
             {carregado && <TouchableOpacity style={styles.finalizarCompra}>

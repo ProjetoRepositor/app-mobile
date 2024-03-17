@@ -11,11 +11,9 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import LoginComponent from './pages/login';
 import CarrinhoComponent from "./pages/carrinho";
-import {Button, Image, TouchableOpacity} from "react-native";
-import DispositivosComponent from "./pages/dispositivos";
-import BuscaComponent from "./pages/busca";
+import {Button, Image, Text, TouchableOpacity} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AdicionarDispositivo from "./pages/adicionar-dispositivo";
+import AdicionarDispositivo from "./pages/configurar-dispositivo";
 
 const Stack = createNativeStackNavigator();
 
@@ -31,7 +29,7 @@ function App(): React.JSX.Element {
                 <Stack.Screen
                     name="AdicionarDispositivo"
                     component={AdicionarDispositivo}
-                    options={{title: 'Adicionar Dispositivo'}}
+                    options={{title: 'Configurar Dispositivo'}}
                 />
                 <Stack.Screen
                     name="Carrinho"
@@ -40,48 +38,10 @@ function App(): React.JSX.Element {
                         title: 'Carrinho',
                         headerRight: () => (
                             <>
-                                <Button title="Dispositivos" onPress={() => props.navigation.navigate("Dispositivos")}/>
+                                <Button title="Dispositivo " onPress={() => props.navigation.navigate("AdicionarDispositivo")}/>
+                                <Text>{'  '}</Text>
                                 <Button title="Sair"
                                         onPress={() => AsyncStorage.removeItem("token").then(() => props.navigation.replace("Home"))}/>
-                                <TouchableOpacity onPress={() => props.navigation.replace("Busca")}>
-                                    <Image
-                                        source={require('./assets/busca.png')}
-                                        style={{
-                                            width: 40,
-                                            height: 40,
-                                            marginLeft: 30,
-                                        }}
-                                    />
-                                </TouchableOpacity>
-                            </>
-                        ),
-                    })}
-                />
-                <Stack.Screen
-                    name="Dispositivos"
-                    component={DispositivosComponent}
-                    options={() => ({
-                        title: 'Dispositivos',
-                    })}
-                />
-                <Stack.Screen
-                    name="Busca"
-                    component={BuscaComponent}
-                    options={(props) => ({
-                        title: 'Buscar Produtos',
-                        headerRight: () => (
-                            <>
-                                <TouchableOpacity onPress={() => props.navigation.replace("Carrinho")}>
-                                    <Image
-                                        source={require('./assets/x.png')}
-                                        style={{
-                                            width: 40,
-                                            height: 40,
-                                            marginLeft: 30,
-                                        }}
-                                        tintColor="red"
-                                    />
-                                </TouchableOpacity>
                             </>
                         ),
                     })}
