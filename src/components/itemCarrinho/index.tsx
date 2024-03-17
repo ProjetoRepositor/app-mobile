@@ -1,8 +1,9 @@
 import React from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {Alert, Image, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {vh, vw} from "../../services/Tamanhos.ts";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Confirm from "../confirm";
 
 type Props = {
     ean: string,
@@ -10,56 +11,60 @@ type Props = {
     title: string,
     qtd: number,
     isSearch?: boolean,
+    setAdicionado: (item : string, acao: boolean) => void,
 }
 
-function adicionarQuantidade(ean: string, quantidade: number, setQuantidade: (x: number) => void) {
-    AsyncStorage.getItem('token').then(token => {
-        const myHeaders = new Headers();
-        myHeaders.append("token", token ?? '');
-        myHeaders.append("Content-Type", "application/json");
+export async function adicionarQuantidade(ean: string, quantidade: number, setQuantidade: (x: number) => void) {
+    const token = await AsyncStorage.getItem('token')
+    const myHeaders = new Headers();
+    myHeaders.append("token", token ?? '');
+    myHeaders.append("Content-Type", "application/json");
 
-        const raw = JSON.stringify({
-            "codigoDeBarras": ean,
-            "quantidade": 1
-        });
-
-        const requestOptions: RequestInit = {
-            method: "POST",
-            headers: myHeaders,
-            body: raw,
-            redirect: "follow"
-        };
-
-        fetch("https://rq0ak44zy0.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/carrinho", requestOptions)
-            .catch((error) => console.error(error));
+    const raw = JSON.stringify({
+        "codigoDeBarras": ean,
+        "quantidade": 1
     });
+
+    const requestOptions: RequestInit = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow"
+    };
+
+    fetch("https://rq0ak44zy0.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/carrinho", requestOptions)
+        .catch((error) => console.error(error));
 
     setQuantidade(quantidade + 1)
 }
 
-function removerQuantidade(ean: string, quantidade: number, setQuantidade: (x: number) => void) {
-    AsyncStorage.getItem('token').then(token => {
-        const myHeaders = new Headers();
-        myHeaders.append("token", token ?? '');
-        myHeaders.append("Content-Type", "application/json");
+export async function removerQuantidade(ean: string, quantidade: number, setQuantidade: (x: number) => void, nome: string, autoremove = false, quantidadeARemover = 1) {
+    if (!autoremove && quantidade === 1) {
+        if (!await Confirm(`Tem certeza que deseja exlcuir ${nome} do seu carrinho`)) {
+            return;
+        }
+    }
+    const token = await AsyncStorage.getItem('token')
+    const myHeaders = new Headers();
+    myHeaders.append("token", token ?? '');
+    myHeaders.append("Content-Type", "application/json");
 
-        const raw = JSON.stringify({
-            "codigoDeBarras": ean,
-            "quantidade": 1
-        });
-
-        const requestOptions: RequestInit = {
-            method: "DELETE",
-            headers: myHeaders,
-            body: raw,
-            redirect: "follow"
-        };
-
-        fetch("https://rq0ak44zy0.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/carrinho", requestOptions)
-            .catch((error) => console.error(error));
+    const raw = JSON.stringify({
+        "codigoDeBarras": ean,
+        "quantidade": quantidadeARemover
     });
 
-    const novaQuantidade = Math.max(quantidade - 1, 0);
+    const requestOptions: RequestInit = {
+        method: "DELETE",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow"
+    };
+
+    fetch("https://rq0ak44zy0.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/carrinho", requestOptions)
+        .catch((error) => console.error(error));
+
+    const novaQuantidade = Math.max(quantidade - quantidadeARemover, 0);
     setQuantidade(novaQuantidade);
 }
 export default function ItemCarrinho(props: Props) {
@@ -89,14 +94,16 @@ export default function ItemCarrinho(props: Props) {
                     </Text>
                     <View style={styles.quantidadeContainer}>
                         <View style={styles.quantidade}>
-                            <TouchableOpacity style={styles.botaoRemover} onPress={() => removerQuantidade(props.ean, quantidade, setQuantidade)}>
+                            <TouchableOpacity style={styles.botaoRemover} onPress={() => removerQuantidade(props.ean, quantidade, setQuantidade, props.title)}>
                                 <Text style={{...styles.font, ...styles.botaoText}}> - </Text>
                             </TouchableOpacity>
                             <Text style={styles.font}> {quantidade} </Text>
                             <TouchableOpacity style={styles.botaoAdicionar} onPress={() => adicionarQuantidade(props.ean, quantidade, setQuantidade)}>
                                 <Text style={{...styles.font, ...styles.botaoText}}> + </Text>
                             </TouchableOpacity>
-                            <BouncyCheckbox text="Adicionado" style={styles.detalhes} />
+                            <BouncyCheckbox text="Adicionado" style={styles.detalhes} onPress={v => {
+                                props.setAdicionado(props.ean, v)
+                            }} />
                         </View>
                     </View>
                 </View>
