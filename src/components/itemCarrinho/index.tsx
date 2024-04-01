@@ -130,6 +130,7 @@ const styles = StyleSheet.create({
     },
     font: {
         fontSize: 18,
+        color:'black'
     },
     botaoAdicionar: {
         backgroundColor: '#50fa37',

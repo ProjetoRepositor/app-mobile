@@ -64,6 +64,7 @@ async function sendData(ssid: string, password: string, token: string, navigario
 
 const AdicionarDispositivo = (props: any) => {
     PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then();
+    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT).then();
 
     const [connected, setConnected] = React.useState(false);
 

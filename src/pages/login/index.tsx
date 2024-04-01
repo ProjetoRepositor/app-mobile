@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  useColorScheme 
 } from 'react-native';
 import {vh, vw} from '../../services/Tamanhos.ts';
 import {contagemRegressiva} from "../../services/Time.ts";
@@ -99,17 +100,19 @@ export default function Login(props: any) {
 
   return (
     <View style={styles.container}>
-      <Text>Login</Text>
+      <Text style={styles.texto}>Login</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
         autoCapitalize="none"
+        placeholderTextColor="#000" // Definindo a cor do placeholder para preto
         value={email}
         onChangeText={setEmail}
       />
      {senhaVisivel && <TextInput
         style={styles.input}
         placeholder="Senha"
+        placeholderTextColor="#000" // Definindo a cor do placeholder para preto
         autoCapitalize="none"
         secureTextEntry={true}
         value={senha}
@@ -159,6 +162,10 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     fontSize: 16,
     margin: 5,
+    color:'black'
+  },
+  texto: { 
+    color:'black'
   },
   buttonLogin: {
     width: 50 * vw,

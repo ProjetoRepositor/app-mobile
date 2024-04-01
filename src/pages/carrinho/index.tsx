@@ -1,11 +1,13 @@
 import React from 'react';
 import ItemCarrinho, {adicionarQuantidade, removerQuantidade} from "../../components/itemCarrinho";
-import {ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from "react-native";
+import {ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Modal,useColorScheme } from "react-native";
 import {vh, vw} from "../../services/Tamanhos.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Loading from '../../components/loading/index.tsx';
 import Confirm from "../../components/confirm";
 import {sleep} from "../../services/Time.ts";
+import Footer from '../../components/footer/index.tsx'; 
+
 
 type CarrinhoApi = {
     codigoDeBarras: string,
@@ -24,6 +26,15 @@ export default function Carrinho() {
     const [carregado, setCarregado] = React.useState<boolean>(false);
     const [adicionados, setAdicionados] = React.useState<string[]>([])
     const [produtoAAdicionar, setProdutoAAdicionar] = React.useState('');
+    const theme = useColorScheme(); // 'light' ou 'dark'
+    const inputStyle = {        
+        borderWidth: 1,
+        width: 40 * vw,
+        left: 5 * vw,
+        color: theme === 'dark' ? 'black' : 'white', // Cor do texto baseada no tema  
+        margin:10     
+        
+      };
 
     const loadData = async () => {
         const token = await AsyncStorage.getItem("token")
@@ -70,9 +81,22 @@ export default function Carrinho() {
     }, [])
 
     return (
+        <View style={{flex: 1}}>
+
         <ScrollView>
-            {!carregado && <Loading/>}
-            {carregado && !carrinho.length && <Text>Nenhum item no carrinho</Text>}
+            {!carregado && <Modal
+                animationType="fade"
+                transparent={true}
+                visible={!carregado}
+            >
+                <View style={styles.centeredView}>
+                    <Loading />
+                </View>
+            </Modal>
+            
+            
+            }
+            {carregado && !carrinho.length && <Text style={styles.labelEspacado}>Nenhum item no carrinho</Text>}
             {carregado && carrinho.map(c => {
                 return <ItemCarrinho
                     key={c.ean}
@@ -93,8 +117,9 @@ export default function Carrinho() {
             {carregado && <View style={{flexDirection: 'row', marginBottom: 20}}>
                 <TextInput
                     placeholder="Novo Produto"
-                    style={{borderWidth: 1, width: 50 * vw, left: 5 * vw}}
+                    style={inputStyle}
                     value={produtoAAdicionar}
+                    placeholderTextColor="#000" // Definindo a cor do placeholder para preto
                     onChangeText={setProdutoAAdicionar}
                 />
                 <TouchableOpacity onPress={() => {
@@ -103,11 +128,11 @@ export default function Carrinho() {
                     adicionarQuantidade(produtoAAdicionar, 1, (x) => {})
                         .then(() => sleep(1000))
                         .then(loadData)
-                }} style={{...styles.finalizarCompra, left: 10 * vw}}>
-                    <Text>Adicionar Produto</Text>
+                }} style={{...styles.botao, marginLeft: 5 * vw,marginTop: 3 * vw}}>
+                    <Text style={styles.textoBotao}>Adicionar Produto</Text>
                 </TouchableOpacity>
             </View>}
-            {(carregado && !!carrinho.length) && <TouchableOpacity style={{...styles.finalizarCompra, marginBottom: 20}} onPress={async () => {
+            {(carregado && !!carrinho.length) && <TouchableOpacity style={{...styles.botao, marginBottom: 20,width:'50%',marginLeft:90}} onPress={async () => {
                 if (!await Confirm('Tem certeza que deseja finalizar a compra? Todos os items adicionados serão removidos do carrinho')) {
                     return;
                 }
@@ -127,11 +152,14 @@ export default function Carrinho() {
                         .then(loadData);
                 });
             }}>
-                <Text>
+                <Text style={styles.textoBotao}>
                     Finalizar Compra
                 </Text>
             </TouchableOpacity>}
         </ScrollView>
+        <Footer/>
+        </View>
+
     );
 }
 
@@ -145,4 +173,30 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderRadius: 40,
     },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo semi-transparente para o modal
+      },
+      botao: {
+        backgroundColor: '#007bff', // Esta é uma tonalidade comum de azul usada para botões
+        paddingHorizontal: 15, // Espaçamento horizontal dentro do botão
+        paddingVertical: 3, // Espaçamento vertical dentro do botão
+        borderRadius: 5, // Bordas arredondadas para o botão
+        alignItems: 'center', // Centraliza o texto horizontalmente
+        justifyContent: 'center', // Centraliza o texto verticalmente
+        height:50
+      },
+      textoBotao: {
+        color: '#ffffff', // Texto branco para contraste com o fundo azul
+        fontSize: 16, // Tamanho do texto
+        fontWeight: 'bold', // Texto em negrito
+      },
+      labelEspacado:{
+        margin:20,
+        color: '#000', 
+
+      }
+      
 })
