@@ -76,8 +76,16 @@ export default function Carrinho() {
         setCarregado(true);
     }
 
+    function callbackLoadData() {
+        console.log('Carregando Dados')
+        loadData().catch(console.log);
+        setTimeout(() => {
+            callbackLoadData();
+        }, 5000);
+    }
+
     React.useEffect(() => {
-        loadData().catch(console.log)
+        callbackLoadData();
     }, [])
 
     return (
