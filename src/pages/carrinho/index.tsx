@@ -8,6 +8,9 @@ import Confirm from "../../components/confirm";
 import {sleep} from "../../services/Time.ts";
 import Footer from '../../components/footer/index.tsx'; 
 
+const lightBlueColor = '#72C7FF'; // Azul claro da nuvem e do carrinho de compras
+const orangeColor = '#FF6A13'; // Laranja do carrinho de compras
+
 
 type CarrinhoApi = {
     codigoDeBarras: string,
@@ -21,19 +24,36 @@ type Carrinho = {
     quantidade: number,
 }
 
+
+
+
+
 export default function Carrinho() {
     const [carrinho, setCarrinho] = React.useState<Carrinho[]>([]);
     const [carregado, setCarregado] = React.useState<boolean>(false);
     const [adicionados, setAdicionados] = React.useState<string[]>([])
     const [produtoAAdicionar, setProdutoAAdicionar] = React.useState('');
     const theme = useColorScheme(); // 'light' ou 'dark'
-    const inputStyle = {        
+    const [modalVisible, setModalVisible] = React.useState<boolean>(false);
+
+    const handleAddProduct = () => {
+        setModalVisible(false); // Fecha o modal após adicionar
+    };
+    
+    const inputStyle = {
         borderWidth: 1,
+        borderColor: orangeColor, // Bordas laranjas
+        borderRadius: 5, // Cantos arredondados
         width: 40 * vw,
-        left: 5 * vw,
-        color: theme === 'dark' ? 'black' : 'white', // Cor do texto baseada no tema  
-        margin:10     
-        
+        padding: 10, // Padding para o texto não ficar colado nas bordas
+        margin: 10,
+        color: '#FFFFFF', // Texto branco
+        backgroundColor: lightBlueColor, // Fundo azul claro
+        shadowColor: '#000', // Sombra para dar um efeito elevado
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
       };
 
     const loadData = async () => {
@@ -89,86 +109,115 @@ export default function Carrinho() {
     }, [])
 
     return (
-        <View style={{flex: 1}}>
-
-        <ScrollView>
-            {!carregado && <Modal
-                animationType="fade"
-                transparent={true}
-                visible={!carregado}
-            >
-                <View style={styles.centeredView}>
-                    <Loading />
+        <View style={styles.containerPrincipal}>
+            <ScrollView>
+                {!carregado && (
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={!carregado}
+                    >
+                        <View style={styles.centeredView}>
+                            <Loading />
+                        </View>
+                    </Modal>
+                )}
+                
+                {carregado && (
+                    <View style={{flexDirection: 'row', marginBottom: 20}}>
+                          <View style={styles.addButtonContainer}>
+                    <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+                        <Text style={styles.addButtonText}>+</Text>
+                    </TouchableOpacity>
+                    
                 </View>
-            </Modal>
-            
-            
-            }
-            {carregado && !carrinho.length && <Text style={styles.labelEspacado}>Nenhum item no carrinho</Text>}
-            {carregado && carrinho.map(c => {
-                return <ItemCarrinho
-                    key={c.ean}
-                    imageUrl={`https://cdn-cosmos.bluesoft.com.br/products/${c.ean}`}
-                    title={c.nome}
-                    qtd={c.quantidade}
-                    ean={c.ean}
-                    setAdicionado={(item, acao) => {
-                        if (acao) {
-                            setAdicionados([...adicionados, item])
-                        } else {
-                            setAdicionados(adicionados.filter(a => a != item))
-                        }
-                    }}
-
-                />
-            })}
-            {carregado && <View style={{flexDirection: 'row', marginBottom: 20}}>
-                <TextInput
-                    placeholder="Novo Produto"
-                    style={inputStyle}
-                    value={produtoAAdicionar}
-                    placeholderTextColor="#000" // Definindo a cor do placeholder para preto
-                    onChangeText={setProdutoAAdicionar}
-                />
-                <TouchableOpacity onPress={() => {
-                    setCarregado(false);
-                    setProdutoAAdicionar('');
-                    adicionarQuantidade(produtoAAdicionar, 1, (x) => {})
-                        .then(() => sleep(1000))
-                        .then(loadData)
-                }} style={{...styles.botao, marginLeft: 5 * vw,marginTop: 3 * vw}}>
-                    <Text style={styles.textoBotao}>Adicionar Produto</Text>
-                </TouchableOpacity>
-            </View>}
-            {(carregado && !!carrinho.length) && <TouchableOpacity style={{...styles.botao, marginBottom: 20,width:'50%',marginLeft:90}} onPress={async () => {
-                if (!await Confirm('Tem certeza que deseja finalizar a compra? Todos os items adicionados serão removidos do carrinho')) {
-                    return;
-                }
-
-                setCarregado(false);
-
-                carrinho.filter(c => adicionados.includes(c.ean)).forEach(c => {
-                    removerQuantidade(
-                        c.ean,
-                        c.quantidade,
-                        (x) => {
-                        },
-                        c.nome,
-                        true,
-                        c.quantidade)
-                        .then(() => sleep(1000))
-                        .then(loadData);
-                });
-            }}>
-                <Text style={styles.textoBotao}>
-                    Finalizar Compra
-                </Text>
-            </TouchableOpacity>}
-        </ScrollView>
-        <Footer/>
+            <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                                <Text style={styles.closeButtonText}>X</Text>
+                            </TouchableOpacity>
+                            <TextInput
+                                placeholder="Novo Produto"
+                                style={inputStyle}
+                                value={produtoAAdicionar}
+                                onChangeText={setProdutoAAdicionar}
+                                placeholderTextColor="black"
+                            />
+                              <TouchableOpacity 
+                            onPress={() => {
+                                setCarregado(false);
+                                setProdutoAAdicionar('');
+                                adicionarQuantidade(produtoAAdicionar, 1, (x) => {})
+                                    .then(() => sleep(1000))
+                                    .then(loadData)
+                                handleAddProduct();
+                            }} 
+                            style={{...styles.botao, marginLeft: 5 * vw, marginTop: 3 * vw}}
+                        >
+                                <Text style={styles.textoBotao}>Adicionar Produto</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+                    </View>
+                )}
+    
+                {carregado && !carrinho.length && <Text style={styles.labelEspacado}>Nenhum item no carrinho</Text>}
+                {carregado && carrinho.map(c => (
+                    <ItemCarrinho
+                        key={c.ean}
+                        imageUrl={`https://cdn-cosmos.bluesoft.com.br/products/${c.ean}`}
+                        title={c.nome}
+                        qtd={c.quantidade}
+                        ean={c.ean}
+                        setAdicionado={(item, acao) => {
+                            if (acao) {
+                                setAdicionados([...adicionados, item])
+                            } else {
+                                setAdicionados(adicionados.filter(a => a !== item))
+                            }
+                        }}
+                    />
+                ))}
+    
+                {(carregado && !!carrinho.length) && (
+                    <TouchableOpacity 
+                        style={{...styles.botao, marginBottom: 20, width: '50%', marginLeft: 90}} 
+                        onPress={async () => {
+                            if (!await Confirm('Tem certeza que deseja finalizar a compra? Todos os items adicionados serão removidos do carrinho')) {
+                                return;
+                            }
+                            setCarregado(false);
+                            carrinho.filter(c => adicionados.includes(c.ean)).forEach(c => {
+                                removerQuantidade(
+                                    c.ean,
+                                    c.quantidade,
+                                    (x) => {},
+                                    c.nome,
+                                    true,
+                                    c.quantidade
+                                )
+                                .then(() => sleep(1000))
+                                .then(loadData);
+                            });
+                        }}
+                    >
+                        <Text style={styles.textoBotao}>
+                            Finalizar Compra
+                        </Text>
+                    </TouchableOpacity>
+                )}
+            </ScrollView>
+            <Footer/>
         </View>
-
     );
+    
 }
 
 const styles = StyleSheet.create({
@@ -188,7 +237,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo semi-transparente para o modal
       },
       botao: {
-        backgroundColor: '#007bff', // Esta é uma tonalidade comum de azul usada para botões
+        backgroundColor: orangeColor, // Botões laranja
         paddingHorizontal: 15, // Espaçamento horizontal dentro do botão
         paddingVertical: 3, // Espaçamento vertical dentro do botão
         borderRadius: 5, // Bordas arredondadas para o botão
@@ -205,6 +254,52 @@ const styles = StyleSheet.create({
         margin:20,
         color: '#000', 
 
-      }
+      },
+      containerPrincipal: { // Adicione este novo estilo
+        flex: 1,
+        backgroundColor: '#0A2240', 
+        paddingBottom: 50,
+      },
+      addButton: {
+        width: 70,
+        height: 70,
+        borderRadius: 25,
+        backgroundColor: '#FF6A13',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 0,
+    },
+    addButtonText: {
+        fontSize: 40,
+        color: '#FFFFFF',
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        width: '80%',
+        alignItems: 'center'
+    },
+    closeButton: {
+        alignSelf: 'flex-end',
+        padding: 10,
+    },
+    closeButtonText: {
+        fontSize: 20,
+        color: '#FF6A13',
+    },
+    addButtonContainer: {
+        flexDirection: 'row', // Ensures horizontal layout
+        justifyContent: 'center', // Centers the content horizontally
+        width: '100%', // Takes full width to allow centering
+        marginBottom: 0, // Space below the button
+        marginTop:10,
+    },
       
 })

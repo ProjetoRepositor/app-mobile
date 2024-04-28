@@ -1,9 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
+
+const windowWidth = Dimensions.get('window').width; // Obtém a largura da tela
+
 
 const Footer = () => (
   <View style={styles.footerContainer}>
-    <Text style={styles.footerText}>v1.1</Text>
+    <Text style={styles.footerText}>v1.2</Text>
   </View>
 );
 
@@ -11,12 +14,13 @@ const styles = StyleSheet.create({
   footerContainer: {
     position: 'absolute',
     bottom: 0,
-    right: 0,
+    width: windowWidth, // Define a largura para igual à da tela
+    backgroundColor: '#0A2240', 
     padding: 10,
   },
   footerText: {
     fontSize: 16,
-    color:'black',
+    color:'white',
   },
 });
 

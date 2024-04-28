@@ -1,24 +1,55 @@
 import React from 'react';
-import {View, Text, StyleSheet, TextInput, PermissionsAndroid, Button, Alert} from 'react-native';
+import {View, Text, StyleSheet, TextInput, PermissionsAndroid, Button, Alert, VirtualizedList} from 'react-native';
 import WifiManager from 'react-native-wifi-reborn'
 import BluetoothClassic from 'react-native-bluetooth-classic';
 import RNPickerSelect, {PickerStyle} from 'react-native-picker-select';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Footer from '../../components/footer/index.tsx'; 
+
+
+const primaryColor = '#FF6A13'; // Laranja
+const secondaryColor = '#72C7FF'; // Azul claro
+const backgroundColor = '#0A2240'; // Azul escuro
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: backgroundColor,
     },
     item: {
         fontSize: 18,
-        width: 300,
-        borderColor: 'black',
-        borderStyle: 'solid',
-        borderWidth: 1,
-        margin: 20,
+    width: '90%',
+    borderRadius: 10,
+    borderColor: primaryColor,
+    borderStyle: 'solid',
+    borderWidth: 1,
+    margin: 10,
+    padding: 15,
+    backgroundColor: '#FFFFFF',
     },
+    texto: { 
+        color: secondaryColor,
+        fontWeight: 'bold',
+        marginBottom: 5,
+      },
+      button: {
+        marginTop: 10,
+        backgroundColor: '#FF6A13', // Fundo laranja do carrinho de compras
+        borderRadius: 20,
+        padding: 15,
+        width: '90%',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      buttonText: {
+        color: '#FFFFFF',
+        fontWeight: 'bold',
+      },
+      footer:{
+        color:'white'
+      }
 });
 
 async function connectToRaspberry() {
@@ -83,14 +114,14 @@ const AdicionarDispositivo = (props: any) => {
     return (
         <View style={styles.container}>
             {connected && <View style={styles.container}>
-                <Text>SSID</Text>
+                <Text style={styles.texto}>SSID</Text>
                 <RNPickerSelect
                     items={wifis.map(w => ({label: w, value: w}))}
                     value={ssid}
                     onValueChange={setSsid}
                     style={styles.item as PickerStyle}
                 />
-                <Text>Senha</Text>
+                <Text style={styles.texto}>Senha</Text>
                 <TextInput
                     style={styles.item}
                     placeholder='Senha'
@@ -99,15 +130,22 @@ const AdicionarDispositivo = (props: any) => {
                     secureTextEntry={true}
                     autoCapitalize="none"
                 />
+                <View style={styles.button}>
                 <Button
+
                     title="Conectar" onPress={() => {
                     AsyncStorage.getItem('token')
                         .then((token) => sendData(ssid, password, token!, props.navigation))
                 }} />
+                </View>
             </View>}
-            {!connected && <Text>Não conectado</Text>}
+            {!connected && <Text style={styles.texto}>Não conectado</Text>}
+            <Footer />
+            
         </View>
     );
 };
+
+
 
 export default AdicionarDispositivo;

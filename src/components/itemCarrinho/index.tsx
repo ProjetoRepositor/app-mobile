@@ -1,6 +1,6 @@
 import React from 'react';
-import {Alert, Image, StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import {vh, vw} from "../../services/Tamanhos.ts";
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { vh, vw } from "../../services/Tamanhos.ts";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Confirm from "../confirm";
@@ -11,8 +11,9 @@ type Props = {
     title: string,
     qtd: number,
     isSearch?: boolean,
-    setAdicionado: (item : string, acao: boolean) => void,
+    setAdicionado: (item: string, acao: boolean) => void,
 }
+const lightBlueColor = '#72C7FF'; // Azul claro da nuvem e do carrinho de compras
 
 export async function adicionarQuantidade(ean: string, quantidade: number, setQuantidade: (x: number) => void) {
     const token = await AsyncStorage.getItem('token')
@@ -74,13 +75,17 @@ export default function ItemCarrinho(props: Props) {
         <>
             {(props.isSearch || (quantidade > 0)) && <View style={styles.container}>
                 <View>
-                    <Image
-                        style={{width: 20 * vw, height: 20 * vw}}
-                        source={{
-                            uri: props.imageUrl
-                        }}
-                        alt={props.title}
-                    />
+                    {props.imageUrl ? (
+                        <Image
+                            style={{ width: 20 * vw, height: 20 * vw }}
+                            source={{ uri: props.imageUrl }}
+                            alt={props.title}
+                        />
+                    ) : (
+                        <View style={styles.imagePlaceholder}>
+                            <Text style={styles.placeholderText}>Sem imagem</Text>
+                        </View>
+                    )}
                 </View>
                 <View style={styles.detalhes}>
                     <Text style={styles.font}>
@@ -95,11 +100,11 @@ export default function ItemCarrinho(props: Props) {
                     <View style={styles.quantidadeContainer}>
                         <View style={styles.quantidade}>
                             <TouchableOpacity style={styles.botaoRemover} onPress={() => removerQuantidade(props.ean, quantidade, setQuantidade, props.title)}>
-                                <Text style={{...styles.font, ...styles.botaoText}}> - </Text>
+                                <Text style={{ ...styles.font, ...styles.botaoText }}> - </Text>
                             </TouchableOpacity>
                             <Text style={styles.font}> {quantidade} </Text>
                             <TouchableOpacity style={styles.botaoAdicionar} onPress={() => adicionarQuantidade(props.ean, quantidade, setQuantidade)}>
-                                <Text style={{...styles.font, ...styles.botaoText}}> + </Text>
+                                <Text style={{ ...styles.font, ...styles.botaoText }}> + </Text>
                             </TouchableOpacity>
                             <BouncyCheckbox text="Adicionado" style={styles.detalhes} onPress={v => {
                                 props.setAdicionado(props.ean, v)
@@ -116,9 +121,20 @@ const styles = StyleSheet.create({
     container: {
         margin: 4 * vw,
         flexDirection: 'row',
+        backgroundColor: lightBlueColor,
+        borderRadius: 5,
+        padding: 10,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 1.41,
+        elevation: 2,
+        overflow: 'hidden', // Assegura que nada saia dos limites do container
     },
     detalhes: {
         marginLeft: 5 * vw,
+        flex: 1, // Faz com que este View preencha todo o espaço restante
     },
     quantidadeContainer: {
         alignItems: 'center',
@@ -130,7 +146,8 @@ const styles = StyleSheet.create({
     },
     font: {
         fontSize: 18,
-        color:'black'
+        color: 'black',
+        flexShrink: 1, // Permite que o texto encolha para evitar quebrar o layout
     },
     botaoAdicionar: {
         backgroundColor: '#50fa37',
@@ -147,6 +164,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     botaoText: {
-      color: '#fff'
+        color: '#fff'
     },
+    imagePlaceholder: {
+        width: 20 * vw,
+        height: 20 * vw,
+        backgroundColor: '#ccc', // Cor de fundo para o placeholder
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      placeholderText: {
+        color: 'white',
+        fontSize: 16,
+      },
 })

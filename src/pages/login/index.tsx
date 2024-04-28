@@ -6,7 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  useColorScheme 
+  useColorScheme,
+  Image, 
 } from 'react-native';
 import {vh, vw} from '../../services/Tamanhos.ts';
 import {contagemRegressiva} from "../../services/Time.ts";
@@ -100,6 +101,12 @@ export default function Login(props: any) {
 
   return (
     <View style={styles.container}>
+       <View style={styles.containerImagem}>
+      <Image
+        source={require('../../assets/Logo.jpeg')} // Substitua pelo caminho correto da sua imagem
+        style={{ width: 200, height: 200, marginRight: 10 }} // Ajuste o tamanho conforme necessário
+      />
+      </View>
       <Text style={styles.texto}>Login</Text>
       <TextInput
         style={styles.input}
@@ -144,12 +151,16 @@ export default function Login(props: any) {
     </View>
   );
 }
+const primaryColor = '#FF6A13'; // Laranja
+const secondaryColor = '#72C7FF'; // Azul claro
+const backgroundColor = '#0A2240'; // Azul escuro
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1, // Use flex to utilize the entire screen
     alignItems: 'center',
-    justifyContent: 'center',
-    height: 80 * vh,
+    justifyContent: 'center', // Center everything vertically and horizontally
+    backgroundColor: backgroundColor, 
   },
   input: {
     width: 70 * vw,
@@ -157,29 +168,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingVertical: 10,
     paddingHorizontal: 15,
-    borderColor: '#ccc',
+    borderColor: primaryColor, // Use variable for consistency
     borderWidth: 1,
     borderRadius: 15,
     fontSize: 16,
-    margin: 5,
-    color:'black'
+    marginBottom: 20, // Increase bottom margin for spacing
+    color: 'black'
   },
   texto: { 
-    color:'black'
+    color: 'white',
+    fontSize: 30,
+    marginBottom: 20, // Space between the text and the input
   },
   buttonLogin: {
     width: 50 * vw,
     height: 6 * vh,
     paddingVertical: 10,
     paddingHorizontal: 15,
-    borderColor: '#ccc',
-    backgroundColor: '#5d5dfc',
+    borderColor: primaryColor,
+    backgroundColor: primaryColor, // Use variable for consistency
     borderWidth: 1,
     borderRadius: 15,
-    fontSize: 16,
-    margin: 5,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 20, // Space before the hyperlink text
   },
   buttonLoginText: {
     color: 'white',
@@ -187,10 +199,13 @@ const styles = StyleSheet.create({
   hyperlink: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: 16,
+    marginBottom: 100, // Push everything up a bit
   },
   hyperlinkText: {
-    color: '#1b50de',
+    color: primaryColor,
+  },
+  containerImagem: {
+    marginBottom: 40, // Reduce margin to push up the logo slightly
   },
 });
 
