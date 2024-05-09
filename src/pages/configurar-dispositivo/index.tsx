@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, StyleSheet, TextInput, PermissionsAndroid, Button, Alert, VirtualizedList} from 'react-native';
+import {View, Text, StyleSheet, TextInput, PermissionsAndroid, Button, Alert, VirtualizedList,TouchableOpacity} from 'react-native';
 import WifiManager from 'react-native-wifi-reborn'
 import BluetoothClassic from 'react-native-bluetooth-classic';
 import RNPickerSelect, {PickerStyle} from 'react-native-picker-select';
@@ -17,6 +17,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: backgroundColor,
+        width:'100%',
+        color:'black'
     },
     item: {
         fontSize: 18,
@@ -28,6 +30,7 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 15,
     backgroundColor: '#FFFFFF',
+    color:'black',
     },
     texto: { 
         color: secondaryColor,
@@ -49,7 +52,21 @@ const styles = StyleSheet.create({
       },
       footer:{
         color:'white'
-      }
+      },
+      botao: {
+        backgroundColor: primaryColor, // Botões laranja
+        paddingHorizontal: 15, // Espaçamento horizontal dentro do botão
+        paddingVertical: 3, // Espaçamento vertical dentro do botão
+        borderRadius: 5, // Bordas arredondadas para o botão
+        alignItems: 'center', // Centraliza o texto horizontalmente
+        justifyContent: 'center', // Centraliza o texto verticalmente
+        height:50
+      },
+      textoBotao: {
+        color: '#ffffff', // Texto branco para contraste com o fundo azul
+        fontSize: 16, // Tamanho do texto
+        fontWeight: 'bold', // Texto em negrito
+      },
 });
 
 async function connectToRaspberry() {
@@ -110,16 +127,20 @@ const AdicionarDispositivo = (props: any) => {
     if (!connected) {
         connectToRaspberry().then(setConnected);
     }
-
     return (
         <View style={styles.container}>
             {connected && <View style={styles.container}>
-                <Text style={styles.texto}>SSID</Text>
+                <Text style={styles.texto}>Wi fi</Text>
                 <RNPickerSelect
                     items={wifis.map(w => ({label: w, value: w}))}
                     value={ssid}
                     onValueChange={setSsid}
                     style={styles.item as PickerStyle}
+                    placeholder={{
+                        label: 'Selecione um Wi Fi...',  // Texto do placeholder
+                        value: null,                       // Valor geralmente é null para placeholders
+                        color: '#9EA0A4',                  // Cor opcional do texto do placeholder
+                      }}
                 />
                 <Text style={styles.texto}>Senha</Text>
                 <TextInput
@@ -130,14 +151,20 @@ const AdicionarDispositivo = (props: any) => {
                     secureTextEntry={true}
                     autoCapitalize="none"
                 />
-                <View style={styles.button}>
-                <Button
-
-                    title="Conectar" onPress={() => {
-                    AsyncStorage.getItem('token')
-                        .then((token) => sendData(ssid, password, token!, props.navigation))
-                }} />
-                </View>
+                <TouchableOpacity 
+                        style={{...styles.botao, marginBottom: 20, width: '50%'}} 
+                        onPress={async () => {
+                            AsyncStorage.getItem('token')
+                            .then((token) => sendData(ssid, password, token!, props.navigation))
+                        }}
+                    >
+                        <Text style={styles.textoBotao}>
+                            Conectar
+                        </Text>
+                    </TouchableOpacity>
+                {/* <View style={styles.button}>
+               
+                </View> */}
             </View>}
             {!connected && <Text style={styles.texto}>Não conectado</Text>}
             <Footer />
