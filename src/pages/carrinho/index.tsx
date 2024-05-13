@@ -1,16 +1,28 @@
 import React from 'react';
 import ItemCarrinho, {adicionarQuantidade, removerQuantidade} from "../../components/itemCarrinho";
-import {ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Modal,useColorScheme } from "react-native";
-import {vh, vw} from "../../services/Tamanhos.ts";
+import {
+    Alert, Button,
+    Modal,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    useColorScheme,
+    View
+} from "react-native";
+import {vw} from "../../services/Tamanhos.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Loading from '../../components/loading/index.tsx';
 import Confirm from "../../components/confirm";
 import {sleep} from "../../services/Time.ts";
-import Footer from '../../components/footer/index.tsx'; 
+import Footer from '../../components/footer/index.tsx';
+// @ts-ignore
+import {styles} from "./styles.tsx";
+import {DownloadFile} from "./download.ts";
+
 
 const lightBlueColor = '#72C7FF'; // Azul claro da nuvem e do carrinho de compras
 const orangeColor = '#FF6A13'; // Laranja do carrinho de compras
-
 
 type CarrinhoApi = {
     codigoDeBarras: string,
@@ -25,9 +37,6 @@ type Carrinho = {
 }
 
 
-
-
-
 export default function Carrinho() {
     const [carrinho, setCarrinho] = React.useState<Carrinho[]>([]);
     const [carregado, setCarregado] = React.useState<boolean>(false);
@@ -35,11 +44,14 @@ export default function Carrinho() {
     const [produtoAAdicionar, setProdutoAAdicionar] = React.useState('');
     const theme = useColorScheme(); // 'light' ou 'dark'
     const [modalVisible, setModalVisible] = React.useState<boolean>(false);
+    const [modal2Visible, setModal2Visible] = React.useState<boolean>(false);
+    const [exportList, setExportList] = React.useState<any[]>([]);
+
 
     const handleAddProduct = () => {
         setModalVisible(false); // Fecha o modal após adicionar
     };
-    
+
     const inputStyle = {
         borderWidth: 1,
         borderColor: orangeColor, // Bordas laranjas
@@ -122,14 +134,44 @@ export default function Carrinho() {
                         </View>
                     </Modal>
                 )}
-                
+
+                {
+                    modal2Visible && (
+                    <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={modal2Visible}
+                        onRequestClose={() => setModal2Visible(false)}
+                    >
+                        <View style={styles.modalOverlay}>
+                            <View style={{...styles.modalContent, marginTop: 20, marginBottom: 20}}>
+                                <ScrollView style={{marginBottom: 10}}>
+                                    {exportList.map((item, index) => (
+                                        <View key={index} style={{ marginBottom: 10 }}>
+                                            <Text>Data de Exportação: {item.exportDate.substring(0, 10)}</Text>
+                                            <Text>Quantidade de Itens: {item.quantidadeProdutos}</Text>
+                                            <Button title="Baixar Arquivo" onPress={() => {
+                                                DownloadFile(item.url).then((response) => Alert.alert("Exportação concluída", `Arquivo disponível em: ${response}`))
+                                                setModal2Visible(false)
+                                            }} />
+                                        </View>
+                                    ))}
+                                </ScrollView>
+                                <Button title="Fechar" onPress={() => setModal2Visible(false)} />
+                            </View>
+                        </View>
+                    </Modal>
+
+                    )
+                }
+
                 {carregado && (
                     <View style={{flexDirection: 'row', marginBottom: 20}}>
                           <View style={styles.addButtonContainer}>
                     <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
                         <Text style={styles.addButtonText}>+</Text>
                     </TouchableOpacity>
-                    
+
                 </View>
             <Modal
                     animationType="slide"
@@ -149,7 +191,7 @@ export default function Carrinho() {
                                 onChangeText={setProdutoAAdicionar}
                                 placeholderTextColor="black"
                             />
-                              <TouchableOpacity 
+                              <TouchableOpacity
                             onPress={() => {
                                 setCarregado(false);
                                 setProdutoAAdicionar('');
@@ -157,7 +199,7 @@ export default function Carrinho() {
                                     .then(() => sleep(1000))
                                     .then(loadData)
                                 handleAddProduct();
-                            }} 
+                            }}
                             style={{...styles.botao, marginLeft: 5 * vw, marginTop: 3 * vw}}
                         >
                                 <Text style={styles.textoBotao}>Adicionar Produto</Text>
@@ -167,7 +209,7 @@ export default function Carrinho() {
                 </Modal>
                     </View>
                 )}
-    
+
                 {carregado && !carrinho.length && <Text style={styles.labelEspacado}>Nenhum item no carrinho</Text>}
                 {carregado && carrinho.map(c => (
                     <ItemCarrinho
@@ -185,121 +227,117 @@ export default function Carrinho() {
                         }}
                     />
                 ))}
-    
+
                 {(carregado && !!carrinho.length) && (
-                    <TouchableOpacity 
-                        style={{...styles.botao, marginBottom: 20, width: '50%', marginLeft: 90}} 
-                        onPress={async () => {
-                            if (!await Confirm('Tem certeza que deseja finalizar a compra? Todos os items adicionados serão removidos do carrinho')) {
-                                return;
-                            }
-                            setCarregado(false);
-                            carrinho.filter(c => adicionados.includes(c.ean)).forEach(c => {
-                                removerQuantidade(
-                                    c.ean,
-                                    c.quantidade,
-                                    (x) => {},
-                                    c.nome,
-                                    true,
-                                    c.quantidade
-                                )
-                                .then(() => sleep(1000))
-                                .then(loadData);
-                            });
-                        }}
-                    >
-                        <Text style={styles.textoBotao}>
-                            Finalizar Compra
-                        </Text>
-                    </TouchableOpacity>
+                    <>
+                        <TouchableOpacity
+                            style={{...styles.botao, marginBottom: 20, width: '50%', marginLeft: 90}}
+                            onPress={async () => {
+                                if (!await Confirm('Tem certeza que deseja finalizar a compra? Todos os items adicionados serão removidos do carrinho')) {
+                                    return;
+                                }
+                                setCarregado(false);
+                                carrinho.filter(c => adicionados.includes(c.ean)).forEach(c => {
+                                    removerQuantidade(
+                                        c.ean,
+                                        c.quantidade,
+                                        (x) => {},
+                                        c.nome,
+                                        true,
+                                        c.quantidade
+                                    )
+                                    .then(() => sleep(1000))
+                                    .then(loadData);
+                                });
+                            }}
+                        >
+                            <Text style={styles.textoBotao}>
+                                Finalizar Compra
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{...styles.botao, marginBottom: 20, width: '50%', marginLeft: 90}}
+                            onPress={async () => {
+                                if (!await Confirm('Tem certeza que deseja exportar seu carrinho para uma planilha excel?')) {
+                                    return;
+                                }
+                                const myHeaders = new Headers();
+
+                                const token = await AsyncStorage.getItem("token")
+
+                                if (!token) return;
+
+                                myHeaders.append("token", token);
+                                myHeaders.append("Content-Type", "application/json");
+
+                                const raw = JSON.stringify(carrinho.map(c => ({
+                                    produto: c.nome,
+                                    quantidade: c.quantidade,
+                                })));
+
+                                const requestOptions: RequestInit = {
+                                    method: "POST",
+                                    headers: myHeaders,
+                                    body: raw,
+                                    redirect: "follow"
+                                };
+
+                                const response = await fetch("https://rq0ak44zy0.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/carrinho/export", requestOptions)
+                                    .then((response) => response.text())
+
+                                console.log(response)
+
+                                const downlaod = await DownloadFile(JSON.parse(response).url);
+                                Alert.alert("Exportação concluída", `Arquivo disponível em: ${downlaod}`)
+                            }}
+                        >
+                            <Text style={styles.textoBotao}>
+                                Exportar Carrinho
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{...styles.botao, marginBottom: 20, width: '50%', marginLeft: 90}}
+                            onPress={async () => {
+                                // console.log(1)
+                                const myHeaders = new Headers();
+
+                                // console.log(2)
+                                const token = await AsyncStorage.getItem("token")
+
+                                // console.log(3)
+                                if (!token) return;
+
+                                // console.log(4)
+                                myHeaders.append("token", token);
+                                myHeaders.append("Content-Type", "application/json");
+
+                                // console.log(5)
+                                const requestOptions: RequestInit = {
+                                    method: "GET",
+                                    headers: myHeaders,
+                                    redirect: "follow"
+                                };
+
+                                // console.log(6)
+                                await fetch("https://rq0ak44zy0.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/carrinho/export-history", requestOptions)
+                                    .then((response) => response.json())
+                                    .then((result) => {
+                                        setExportList(result.exports);
+                                        setModal2Visible(true);
+                                    })
+                                    .catch((error) => console.error(error));
+                            }}
+                        >
+                            <Text style={styles.textoBotao}>
+                                Histórico Exportações
+                            </Text>
+                        </TouchableOpacity>
+                    </>
                 )}
             </ScrollView>
             <Footer/>
         </View>
     );
-    
 }
 
-const styles = StyleSheet.create({
-    finalizarCompra: {
-        width: 30 * vw,
-        left: 60 * vw,
-        height: 7 * vh,
-        backgroundColor: '#40ff64',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 40,
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo semi-transparente para o modal
-      },
-      botao: {
-        backgroundColor: orangeColor, // Botões laranja
-        paddingHorizontal: 15, // Espaçamento horizontal dentro do botão
-        paddingVertical: 3, // Espaçamento vertical dentro do botão
-        borderRadius: 5, // Bordas arredondadas para o botão
-        alignItems: 'center', // Centraliza o texto horizontalmente
-        justifyContent: 'center', // Centraliza o texto verticalmente
-        height:50
-      },
-      textoBotao: {
-        color: '#ffffff', // Texto branco para contraste com o fundo azul
-        fontSize: 16, // Tamanho do texto
-        fontWeight: 'bold', // Texto em negrito
-      },
-      labelEspacado:{
-        margin:20,
-        color: '#000', 
-
-      },
-      containerPrincipal: { // Adicione este novo estilo
-        flex: 1,
-        backgroundColor: '#0A2240', 
-        paddingBottom: 50,
-      },
-      addButton: {
-        width: 70,
-        height: 70,
-        borderRadius: 25,
-        backgroundColor: '#FF6A13',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 0,
-    },
-    addButtonText: {
-        fontSize: 40,
-        color: '#FFFFFF',
-    },
-    modalOverlay: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
-    },
-    modalContent: {
-        backgroundColor: 'white',
-        padding: 20,
-        borderRadius: 10,
-        width: '80%',
-        alignItems: 'center'
-    },
-    closeButton: {
-        alignSelf: 'flex-end',
-        padding: 10,
-    },
-    closeButtonText: {
-        fontSize: 20,
-        color: '#FF6A13',
-    },
-    addButtonContainer: {
-        flexDirection: 'row', // Ensures horizontal layout
-        justifyContent: 'center', // Centers the content horizontally
-        width: '100%', // Takes full width to allow centering
-        marginBottom: 0, // Space below the button
-        marginTop:10,
-    },
-      
-})
+// @ts-ignore
