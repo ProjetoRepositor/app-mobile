@@ -6,12 +6,12 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  useColorScheme,
-  Image, 
+  Image, Modal, Dimensions, Linking, Button,
 } from 'react-native';
 import {vh, vw} from '../../services/Tamanhos.ts';
 import {contagemRegressiva} from "../../services/Time.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Pdf from "react-native-pdf";
 
 function navigateToCarrinho(navigation: any) {
   navigation.replace('Carrinho');
@@ -35,6 +35,8 @@ export default function Login(props: any) {
   const [senha, setSenha] = React.useState("");
 
   const [segundosFaltando, setSegundosFaltando] = React.useState(0);
+
+  const [exibeTermos, setExibeTermos] = React.useState(false);
 
   // verificaLogin(props.navigation);
 
@@ -99,8 +101,43 @@ export default function Login(props: any) {
     }
   };
 
+  const source = { uri: 'https://repocartninja.s3.sa-east-1.amazonaws.com/Termos+de+Uso+TCC+Carrinho+de+Compras+Virtual.pdf', cache: true };
+
   return (
     <View style={styles.container}>
+      <Modal
+        visible={exibeTermos}
+      >
+        <View style={{
+          flex: 1,
+          justifyContent: 'flex-start',
+          alignItems: 'center',
+          marginTop: 25,
+        }}>
+          <Pdf
+              trustAllCerts={false}
+              source={source}
+              onLoadComplete={(numberOfPages) => {
+                console.log(`Number of pages: ${numberOfPages}`);
+              }}
+              onPageChanged={(page) => {
+                console.log(`Current page: ${page}`);
+              }}
+              onError={(error) => {
+                console.log(error);
+              }}
+              onPressLink={(uri) => {
+                console.log(`Link pressed: ${uri}`);
+                Linking.openURL(uri);
+              }}
+              style={{
+                flex:1,
+                width:Dimensions.get('window').width,
+                height:Dimensions.get('window').height,
+              }}/>
+          <Button title="Fechar" onPress={() => setExibeTermos(false)}/>
+        </View>
+      </Modal>
        <View style={styles.containerImagem}>
       <Image
         source={require('../../assets/Logo.jpeg')} // Substitua pelo caminho correto da sua imagem
@@ -125,7 +162,15 @@ export default function Login(props: any) {
         value={senha}
         onChangeText={setSenha}
     />}
-    {senhaVisivel && <Text>
+      <Text style={{color: 'white'}}>
+        Ao realizar login, você concorda com os
+        <TouchableOpacity style={styles.hyperlink} onPress={() => setExibeTermos(true)}>
+          <Text style={styles.hyperlinkText}>
+            Termos de uso
+          </Text>
+        </TouchableOpacity>
+      </Text>
+    {senhaVisivel && <Text style={{color: 'white'}}>
       Não recebeu?
       {segundosFaltando == 0 &&
           <TouchableOpacity onPress={solicitarNovamente} style={styles.hyperlink}>
@@ -152,7 +197,6 @@ export default function Login(props: any) {
   );
 }
 const primaryColor = '#FF6A13'; // Laranja
-const secondaryColor = '#72C7FF'; // Azul claro
 const backgroundColor = '#0A2240'; // Azul escuro
 
 const styles = StyleSheet.create({
