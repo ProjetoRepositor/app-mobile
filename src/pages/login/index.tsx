@@ -105,7 +105,8 @@ export default function Login(props: any) {
 
   return (
     <View style={styles.container}>
-      <Modal
+      <Modal style={{
+      }}
         visible={exibeTermos}
       >
         <View style={{
@@ -162,7 +163,7 @@ export default function Login(props: any) {
         value={senha}
         onChangeText={setSenha}
     />}
-      <Text style={{color: 'white'}}>
+      <Text style={{color: 'white', margin:10}}>
         Ao realizar login, você concorda com os
         <TouchableOpacity style={styles.hyperlink} onPress={() => setExibeTermos(true)}>
           <Text style={styles.hyperlinkText}>
@@ -247,6 +248,7 @@ const styles = StyleSheet.create({
   },
   hyperlinkText: {
     color: primaryColor,
+  
   },
   containerImagem: {
     marginBottom: 40, // Reduce margin to push up the logo slightly
