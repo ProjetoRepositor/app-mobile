@@ -2,10 +2,15 @@ import {StyleSheet} from "react-native";
 import {vh, vw} from "../../services/Tamanhos.ts";
 
 
-const lightBlueColor = '#72C7FF'; // Azul claro da nuvem e do carrinho de compras
+// const lightBlueColor = '#72C7FF'; // Azul claro da nuvem e do carrinho de compras
 const orangeColor = '#FF6A13'; // Laranja do carrinho de compras
 
 export const styles = StyleSheet.create({
+    status: {
+        margin: 50,
+        height: 300,
+        width: 500,
+    },
     finalizarCompra: {
         width: 30 * vw,
         left: 60 * vw,

@@ -7,7 +7,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    useColorScheme,
+    // useColorScheme,
     View
 } from "react-native";
 import {vw} from "../../services/Tamanhos.ts";
@@ -29,6 +29,16 @@ type CarrinhoApi = {
     quantidade: number,
 };
 
+
+type StatusApi = {
+    idTranscricao: string,
+    situacaoAtual: string,
+    textoRecebido?: string,
+    produtoEncontrado?: string,
+    quantidade?: number,
+};
+
+
 type Carrinho = {
     ean: string,
     nome: string,
@@ -42,10 +52,11 @@ export default function Carrinho() {
     const [carregado, setCarregado] = React.useState<boolean>(false);
     const [adicionados, setAdicionados] = React.useState<string[]>([])
     const [produtoAAdicionar, setProdutoAAdicionar] = React.useState('');
-    const theme = useColorScheme(); // 'light' ou 'dark'
+    // const theme = useColorScheme(); // 'light' ou 'dark'
     const [modalVisible, setModalVisible] = React.useState<boolean>(false);
     const [modal2Visible, setModal2Visible] = React.useState<boolean>(false);
     const [exportList, setExportList] = React.useState<any[]>([]);
+    const [statuses, setStatuses] = React.useState<StatusApi[]>([]);
 
 
     const handleAddProduct = () => {
@@ -68,10 +79,27 @@ export default function Carrinho() {
         elevation: 5,
       };
 
+    const loadStatuses = async (token: string) => {
+        const myHeaders = new Headers();
+
+        myHeaders.append("token", token);
+        const requestOptions: RequestInit = {
+            method: 'GET',
+            headers: myHeaders,
+            redirect: 'follow'
+        };
+
+        return await fetch("https://rq0ak44zy0.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/status", requestOptions)
+            .then(r => r.json());
+
+    }
+
     const loadData = async () => {
         const token = await AsyncStorage.getItem("token")
 
         if (!token) return;
+
+        setStatuses(await loadStatuses(token));
 
         const response: Carrinho[] = [];
         const myHeaders = new Headers();
@@ -148,8 +176,8 @@ export default function Carrinho() {
                                 <ScrollView style={{marginBottom: 10}}>
                                     {exportList.map((item, index) => (
                                         <View key={index} style={{ marginBottom: 10 }}>
-                                            <Text>Data de Exportação: {item.exportDate.substring(0, 10)}</Text>
-                                            <Text>Quantidade de Itens: {item.quantidadeProdutos}</Text>
+                                            <Text style={{color: 'black'}}>Data de Exportação: {item.exportDate.substring(0, 10)}</Text>
+                                            <Text style={{color: 'black'}}>Quantidade de Itens: {item.quantidadeProdutos}</Text>
                                             <Button title="Baixar Arquivo" onPress={() => {
                                                 DownloadFile(item.url).then((response) => Alert.alert("Exportação concluída", `Arquivo disponível em: ${response}`))
                                                 setModal2Visible(false)
@@ -228,6 +256,14 @@ export default function Carrinho() {
                     />
                 ))}
 
+                {statuses.map(s => (
+                    <View style={styles.status} key={s.idTranscricao}>
+                        <Text>
+                            {s.situacaoAtual}
+                        </Text>
+                    </View>
+                ))}
+
                 {(carregado && !!carrinho.length) && (
                     <>
                         <TouchableOpacity
@@ -285,7 +321,7 @@ export default function Carrinho() {
                                 const response = await fetch("https://rq0ak44zy0.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/carrinho/export", requestOptions)
                                     .then((response) => response.text())
 
-                                console.log(response)
+                                // console.log(response)
 
                                 const downlaod = await DownloadFile(JSON.parse(response).url);
                                 Alert.alert("Exportação concluída", `Arquivo disponível em: ${downlaod}`)
