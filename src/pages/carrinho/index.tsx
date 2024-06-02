@@ -57,7 +57,8 @@ export default function Carrinho() {
     const [modal2Visible, setModal2Visible] = React.useState<boolean>(false);
     const [exportList, setExportList] = React.useState<any[]>([]);
     const [statuses, setStatuses] = React.useState<StatusApi[]>([]);
-
+    const [key, setKey] = React.useState(0);
+    
 
     const handleAddProduct = () => {
         setModalVisible(false); // Fecha o modal após adicionar
@@ -90,7 +91,7 @@ export default function Carrinho() {
         };
 
         return await fetch("https://rq0ak44zy0.execute-api.sa-east-1.amazonaws.com/Prod/api/v1/status", requestOptions)
-            .then(r => r.json());
+            .then(r => r.json()).then(r=>r.filter((x: StatusApi) => x.situacaoAtual!=='Transcrição Concluída'));
 
     }
 
@@ -134,6 +135,7 @@ export default function Carrinho() {
         }
         setCarrinho(response.filter(p => p.nome));
         setCarregado(true);
+        setKey(key + 1);
     }
 
     function callbackLoadData() {
@@ -147,6 +149,7 @@ export default function Carrinho() {
     React.useEffect(() => {
         callbackLoadData();
     }, [])
+    // console.log(carrinho);
 
     return (
         <View style={styles.containerPrincipal}>
@@ -241,7 +244,7 @@ export default function Carrinho() {
                 {carregado && !carrinho.length && <Text style={styles.labelEspacado}>Nenhum item no carrinho</Text>}
                 {carregado && carrinho.map(c => (
                     <ItemCarrinho
-                        key={c.ean}
+                        key={c.ean + key}
                         imageUrl={`https://cdn-cosmos.bluesoft.com.br/products/${c.ean}`}
                         title={c.nome}
                         qtd={c.quantidade}
