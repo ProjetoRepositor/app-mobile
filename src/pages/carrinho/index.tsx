@@ -226,7 +226,7 @@ export default function Carrinho() {
                             onPress={() => {
                                 setCarregado(false);
                                 setProdutoAAdicionar('');
-                                adicionarQuantidade(produtoAAdicionar, 1, (x) => {})
+                                adicionarQuantidade(produtoAAdicionar, 1, () => {})
                                     .then(() => sleep(1000))
                                     .then(loadData)
                                 handleAddProduct();
@@ -261,8 +261,10 @@ export default function Carrinho() {
 
                 {statuses.map(s => (
                     <View style={styles.status} key={s.idTranscricao}>
-                        <Text>
-                            {s.situacaoAtual}
+                        <Text style={{ color: 'black', textAlign: 'center', width: '100%' }}>
+                            {`${s.situacaoAtual}${
+                                s.textoRecebido === null ? '' : '\n Texto Recebido: ' + s.textoRecebido
+                            }`}
                         </Text>
                     </View>
                 ))}
@@ -280,7 +282,7 @@ export default function Carrinho() {
                                     removerQuantidade(
                                         c.ean,
                                         c.quantidade,
-                                        (x) => {},
+                                        () => {},
                                         c.nome,
                                         true,
                                         c.quantidade
